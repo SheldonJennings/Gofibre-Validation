@@ -2,184 +2,597 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Go Fibre — Validation Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --green: #7DFFD1;
+    --green-dark: #3D9E7A;
+    --green-mid: #5DCBA0;
+    --dark: #1E2530;
+    --dark-mid: #2A3345;
+    --dark-light: #3A4560;
+    --white: #FFFFFF;
+    --off-white: #F4FBF8;
+    --text: #1E2530;
+    --text-light: #5A6A7E;
+    --border: #C8EFE3;
+    --fail-red: #E74C3C;
+    --fail-bg: #FFF5F5;
+    --card-shadow: 0 2px 16px rgba(30,37,48,0.08);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #f0f4f8; color: #1a1a2e; min-height: 100vh; }
-  header { background: #1F3864; color: white; padding: 16px 24px; }
-  header h1 { font-size: 18px; font-weight: 700; }
-  header p  { font-size: 13px; color: #BDD7EE; margin-top: 2px; }
-  .container { max-width: 920px; margin: 0 auto; padding: 24px 16px; }
-  .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-  .card h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2E75B6; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #BDD7EE; }
-  label { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
-  input, select, textarea { padding: 8px 10px; border: 1.5px solid #ccc; border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif; background: #fafafa; color: #1a1a2e; width: 100%; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #2E75B6; }
-  .details-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
-  .quick-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-  .quick-hint  { font-size: 11px; color: #2E75B6; margin-bottom: 10px; }
-  .quick-wrap  { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .qbtn { background: #e8f0fe; border: 2px solid #BDD7EE; color: #1F3864; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
-  .qbtn.on { background: #2E75B6; color: #fff; border-color: #1F3864; }
-  .form-grid { display: grid; grid-template-columns: 190px 150px 1fr 155px; gap: 10px; align-items: end; margin-bottom: 6px; }
-  .add-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
-  .sel-count { font-size: 12px; color: #2E75B6; font-weight: 600; }
-  .btn-desel { background: none; border: none; color: #999; font-size: 12px; cursor: pointer; text-decoration: underline; }
-  .hint { background: #fffbea; border: 1px solid #f6d860; border-radius: 8px; padding: 8px 14px; font-size: 12px; color: #7a6000; margin-bottom: 14px; }
-  .paste-box { border: 2px dashed #BDD7EE; border-radius: 8px; background: #f7f9fc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px; min-height: 58px; text-align: center; }
-  .paste-box.ok { border-color: #27ae60; background: #f0fff4; }
-  .paste-box span { font-size: 11px; font-weight: 600; color: #666; }
-  .paste-box span.ok { color: #27ae60; }
-  .paste-box button { background: none; border: none; color: #e74c3c; font-size: 11px; cursor: pointer; margin-top: 2px; }
-  .btn-main   { padding: 9px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .btn-add    { background: #2E75B6; color: white; padding: 10px 28px; font-size: 14px; }
-  .btn-add:hover { background: #1F3864; }
-  .btn-dark   { background: #1F3864; color: white; }
-  .btn-green  { background: #27ae60; color: white; }
-  .btn-orange { background: #e67e22; color: white; }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--dark);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-text {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+  .logo-text span { color: var(--green); }
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-left: 2px;
+    display: inline-block;
+  }
+  .header-badge {
+    background: var(--dark-mid);
+    border: 1px solid var(--dark-light);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .save-indicator {
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  /* ── Layout ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(125,255,209,0.15);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--off-white);
+  }
+  .card-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--dark);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--dark);
+  }
+
+  /* ── Form elements ── */
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  input, select, textarea {
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Nunito Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--text);
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 3px rgba(125,255,209,0.2);
+    background: white;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+
+  /* ── Grids ── */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .span-full { grid-column: 1 / -1; }
+
+  /* ── Quick buttons ── */
+  .quick-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .quick-hint { font-size: 11px; color: var(--text-light); margin-bottom: 10px; }
+  .quick-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .qbtn {
+    background: var(--off-white);
+    border: 1.5px solid var(--border);
+    color: var(--dark);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .qbtn:hover { border-color: var(--green-mid); background: rgba(125,255,209,0.1); }
+  .qbtn.on { background: var(--dark); color: var(--green); border-color: var(--dark); }
+
+  /* ── Log form ── */
+  .log-grid {
+    display: grid;
+    grid-template-columns: 190px 140px 1fr 150px;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 12px;
+  }
+  .add-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .sel-count { font-size: 12px; color: var(--green-dark); font-weight: 700; }
+  .btn-desel { background: none; border: none; color: var(--text-light); font-size: 12px; cursor: pointer; text-decoration: underline; font-family: 'Nunito Sans', sans-serif; }
+
+  /* ── Paste/camera box ── */
+  .paste-box {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    background: var(--off-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px;
+    min-height: 58px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .paste-box.ok { border-color: var(--green-mid); background: rgba(125,255,209,0.1); }
+  .paste-box span { font-size: 11px; font-weight: 700; color: var(--text-light); }
+  .paste-box span.ok { color: var(--green-dark); }
+  .paste-box button { background: none; border: none; color: var(--fail-red); font-size: 11px; cursor: pointer; margin-top: 2px; font-family: 'Nunito Sans', sans-serif; }
+  .camera-label {
+    margin-top: 5px;
+    display: block;
+    background: var(--dark-mid);
+    color: var(--green);
+    border-radius: 6px;
+    padding: 5px 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 11px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .btn-add {
+    background: var(--dark);
+    color: var(--green);
+    padding: 12px 30px;
+    font-size: 14px;
+    border: 2px solid transparent;
+  }
+  .btn-add:hover { background: var(--dark-mid); border-color: var(--green); }
+  .btn-export { background: var(--green); color: var(--dark); }
+  .btn-export:hover { background: var(--green-mid); }
+  .btn-outlook { background: var(--dark); color: var(--white); border: 1px solid var(--dark-light); }
+  .btn-outlook:hover { background: var(--dark-mid); }
+  .btn-copy { background: var(--off-white); color: var(--dark); border: 1.5px solid var(--border); }
+  .btn-copy:hover { border-color: var(--green-mid); }
+  .btn-danger { background: none; color: var(--fail-red); border: 1.5px solid #fcc; font-size: 12px; padding: 8px 14px; }
+  .btn-danger:hover { background: var(--fail-bg); }
   .btn-purple { background: #8e44ad; color: white; }
-  .btn-light  { background: #e8f0fe; color: #2E75B6; font-size: 12px; }
-  .btn-yellow { background: #f39c12; color: white; font-size: 12px; }
+  .btn-purple:hover { background: #7d3c98; }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
 
-  /* Fail list */
-  .fail-item { border-left: 4px solid #2E75B6; background: #f8fafd; border-radius: 6px; margin-bottom: 8px; }
-  .fail-row  { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; }
-  .fail-num  { font-weight: 700; color: #1a1a2e; font-size: 13px; flex-shrink: 0; min-width: 22px; }
-  .ref-tag   { font-weight: 700; color: #1F3864; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
-  .issue-text { flex: 1; color: #333; font-size: 13px; line-height: 1.5; }
-  .pic-badge { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; border-radius: 12px; padding: 2px 8px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-  .edit-btn  { background: #e8f0fe; border: none; color: #2E75B6; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 10px; padding: 2px 8px; flex-shrink: 0; }
-  .edit-btn:hover { background: #2E75B6; color: white; }
-  .del-btn   { background: none; border: none; color: #c0392b; font-size: 20px; cursor: pointer; flex-shrink: 0; line-height: 1; padding: 0 4px; }
-  .pic-area  { display: none; padding: 0 12px 10px; }
-  .pic-area img { max-width: 100%; max-height: 260px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; }
-  .pic-cap   { font-size: 11px; color: #888; margin-top: 4px; }
+  /* ── Fail list ── */
+  .fail-item {
+    border-left: 4px solid var(--green-mid);
+    background: var(--white);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 6px rgba(30,37,48,0.06);
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .fail-item:hover { box-shadow: 0 3px 12px rgba(30,37,48,0.1); }
+  .fail-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+  .fail-num {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    color: var(--dark);
+    font-size: 13px;
+    flex-shrink: 0;
+    min-width: 24px;
+    background: var(--off-white);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .ref-tag {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    color: var(--dark);
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: var(--dark);
+    color: var(--green);
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    margin-top: 3px;
+  }
+  .issue-text { flex: 1; color: var(--text); font-size: 13px; line-height: 1.5; padding-top: 2px; }
+  .pic-badge {
+    background: rgba(61,158,122,0.1);
+    border: 1px solid var(--green-mid);
+    color: var(--green-dark);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .edit-btn {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    color: var(--text-light);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 3px 8px;
+    flex-shrink: 0;
+    font-family: 'Nunito Sans', sans-serif;
+  }
+  .edit-btn:hover { background: var(--dark); color: var(--green); border-color: var(--dark); }
+  .del-btn { background: none; border: none; color: #ccc; font-size: 20px; cursor: pointer; flex-shrink: 0; line-height: 1; padding: 0 4px; }
+  .del-btn:hover { color: var(--fail-red); }
+  .pic-area { display: none; padding: 0 14px 12px; }
+  .pic-area img { max-width: 100%; max-height: 260px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+  .pic-cap { font-size: 11px; color: var(--text-light); margin-top: 4px; }
 
-  /* Edit modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 998; align-items: center; justify-content: center; padding: 20px; }
+  /* ── Type counter ── */
+  .type-counter { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--off-white); }
+  .type-pill {
+    background: var(--dark);
+    color: var(--green);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-light);
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .empty p { font-size: 13px; }
+
+  .count-badge {
+    background: var(--green);
+    color: var(--dark);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ── Output ── */
+  .out-header {
+    background: var(--dark);
+    color: var(--green);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.03em;
+  }
+  .out-lines { list-style: none; }
+  .out-lines li { font-size: 13px; color: var(--text); line-height: 1.7; padding: 5px 0; border-bottom: 1px solid var(--off-white); }
+  .out-lines li:last-child { border-bottom: none; }
+  .out-empty { color: var(--text-light); font-style: italic; font-size: 13px; }
+  .out-actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+  .export-note { font-size: 11px; color: var(--text-light); margin-top: 8px; line-height: 1.5; }
+
+  /* ── Load/save ── */
+  .load-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: var(--off-white);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .load-area span { font-size: 12px; color: var(--text-light); flex: 1; }
+  input[type="file"] { width: auto; background: none; border: none; padding: 0; font-size: 12px; }
+
+  /* ── Hint bar ── */
+  .hint {
+    background: rgba(125,255,209,0.1);
+    border: 1px solid rgba(125,255,209,0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--dark);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Cheat sheet ── */
+  .cheat-table { width: 100%; border-collapse: collapse; font-size: 12px; border-radius: 8px; overflow: hidden; }
+  .cheat-table thead tr { background: var(--dark); color: var(--white); }
+  .cheat-table thead th { padding: 10px 14px; text-align: left; font-family: 'Nunito', sans-serif; font-weight: 800; }
+  .cheat-table tbody tr:nth-child(odd) { background: var(--off-white); }
+  .cheat-table tbody tr:nth-child(even) { background: var(--white); }
+  .cheat-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  .cheat-table td:first-child { font-weight: 700; color: var(--dark); }
+  .cheat-code { font-family: monospace; background: rgba(125,255,209,0.2); color: var(--dark); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .cheat-tip {
+    margin-top: 12px;
+    background: rgba(125,255,209,0.1);
+    border: 1px solid rgba(125,255,209,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--dark);
+  }
+  .step-bar {
+    background: var(--dark);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .step { display: flex; align-items: center; gap: 8px; }
+  .step-num {
+    width: 22px; height: 22px;
+    background: var(--green);
+    color: var(--dark);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 900;
+    font-family: 'Nunito', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step span { font-size: 12px; color: var(--white); font-weight: 600; }
+
+  /* ── Modal ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,37,48,0.6); z-index: 998; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
   .modal-overlay.show { display: flex; }
-  .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 580px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-  .modal h3 { font-size: 15px; font-weight: 700; color: #1F3864; margin-bottom: 16px; }
+  .modal { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h3 { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; color: var(--dark); margin-bottom: 16px; }
   .modal label { margin-bottom: 4px; }
   .modal input, .modal textarea { margin-bottom: 12px; }
   .modal textarea { min-height: 80px; resize: vertical; }
   .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
 
-  .empty { color: #aaa; font-style: italic; font-size: 13px; text-align: center; padding: 20px; }
-  .count-badge { background: #2E75B6; color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
-  .out-header { background: #1F3864; color: white; border-radius: 6px; padding: 10px 14px; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
-  .out-lines  { list-style: none; }
-  .out-lines li { font-size: 13px; color: #1a1a2e; line-height: 1.7; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
-  .out-lines li:last-child { border-bottom: none; }
-  .out-empty  { color: #aaa; font-style: italic; font-size: 13px; }
-  .out-actions { display: flex; gap: 10px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
-  .export-note { font-size: 11px; color: #888; margin-top: 8px; }
-  .save-bar { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 8px 14px; font-size: 12px; color: #2e7d32; margin-bottom: 14px; display: none; }
-  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  /* ── Lightbox ── */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
   .lightbox.show { display: flex; }
-  .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
-  .lb-close { position: absolute; top: 14px; right: 18px; color: white; font-size: 32px; cursor: pointer; font-weight: 700; line-height: 1; }
+  .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 10px; }
+  .lb-close { position: absolute; top: 14px; right: 18px; color: white; font-size: 32px; cursor: pointer; font-weight: 700; }
 
-  /* Load session */
-  .load-area { border: 2px dashed #BDD7EE; border-radius: 8px; padding: 12px 16px; background: #f7f9fc; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .load-area span { font-size: 12px; color: #666; }
-  input[type="file"] { width: auto; background: none; border: none; padding: 0; font-size: 12px; }
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .log-grid { grid-template-columns: 1fr 1fr; }
+    .log-grid > div:nth-child(3) { grid-column: 1 / -1; }
+    .log-grid > div:nth-child(4) { grid-column: 1 / -1; }
+    .header-inner { padding: 12px 16px; }
+    .logo-text { font-size: 18px; }
+    .btn { padding: 12px 16px; font-size: 13px; }
+    .btn-add { width: 100%; text-align: center; }
+    .add-row { flex-direction: column; align-items: stretch; }
+    .out-actions { flex-direction: column; }
+    .out-actions .btn { width: 100%; text-align: center; }
+    .load-area { flex-direction: column; }
+    .step-bar { flex-direction: column; gap: 10px; }
+  }
 </style>
 </head>
 <body>
+
 <header>
-  <h1>Go Fibre — Validation Report</h1>
-  <p>Build Assurance | IQGeo Survey Validation</p>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-text">Go<span>Fibre</span><span class="logo-dot"></span></div>
+      <div class="header-badge">Validation Report</div>
+    </div>
+    <div class="header-right">
+      <span class="save-indicator" id="saveIndicator">✓ Saved</span>
+    </div>
+  </div>
 </header>
+
 <div class="container">
 
+  <!-- Survey Details -->
   <div class="card">
-    <h2>Survey Details</h2>
-    <div class="save-bar" id="saveBar">✅ Session auto-saved</div>
-    <div class="details-grid">
-      <div><label>ZN ID</label><input type="text" id="znId" placeholder="e.g. ZN-001"/></div>
-      <div><label>Build Area</label><input type="text" id="buildArea" placeholder="e.g. Newburgh"/></div>
-      <div><label>Surveyor Name</label><input type="text" id="surveyorName" placeholder="e.g. John Smith"/></div>
-      <div><label>Phone Number</label><input type="text" id="surveyorPhone" placeholder="e.g. 07700 900000"/></div>
+    <div class="card-header">
+      <div class="card-icon">📋</div>
+      <div class="card-title">Survey Details</div>
     </div>
-    <div style="margin-top:10px;">
-      <label>Email Address(es) <span style="font-weight:400;color:#888;">— separate multiple with a comma</span></label>
-      <input type="text" id="surveyorEmail" placeholder="e.g. john@example.com, jane@example.com, manager@gofibre.co.uk"/>
+    <div class="grid-4" style="margin-bottom:12px;">
+      <div><label>ZN ID</label><input type="text" id="znId" placeholder="e.g. ZN7165"/></div>
+      <div><label>Build Area</label><input type="text" id="buildArea" placeholder="e.g. Newburgh"/></div>
+      <div><label>Validation Date</label><input type="date" id="valDate"/></div>
+      <div><label>Surveyor Name</label><input type="text" id="surveyorName" placeholder="e.g. John Smith"/></div>
+    </div>
+    <div class="grid-2">
+      <div><label>Phone Number</label><input type="text" id="surveyorPhone" placeholder="e.g. 07700 900000"/></div>
+      <div><label>Email Address(es) <span style="font-weight:400;text-transform:none;font-size:11px;">— separate multiple with a comma</span></label><input type="text" id="surveyorEmail" placeholder="e.g. john@gofibre.co.uk, jane@gofibre.co.uk"/></div>
+    </div>
+    <div style="margin-top:12px;">
+      <label>General ZN Notes <span style="font-weight:400;text-transform:none;font-size:11px;">— optional, appears in Word doc</span></label>
+      <textarea id="znNotes" placeholder="Any general observations about this ZN..."></textarea>
     </div>
   </div>
 
+  <!-- IQGeo Cheat Sheet -->
   <div class="card">
-    <h2>IQGeo Query Cheat Sheet</h2>
-    <div style="background:#f7f9fc;border:1.5px solid #BDD7EE;border-radius:8px;padding:14px 16px;margin-bottom:10px;">
-      <div style="font-size:12px;font-weight:700;color:#1F3864;margin-bottom:10px;">Before running any query:</div>
-      <div style="font-size:12px;color:#333;margin-bottom:6px;">1. <strong>Click the ZN boundary polygon</strong> on the map to select it</div>
-      <div style="font-size:12px;color:#333;margin-bottom:6px;">2. Open <strong>Build a Query</strong></div>
-      <div style="font-size:12px;color:#333;">3. Select your object, tick <strong>In Selection</strong>, click <strong>Run</strong></div>
+    <div class="card-header">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">IQGeo Query Cheat Sheet</div>
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-      <thead>
-        <tr style="background:#1F3864;color:white;">
-          <th style="padding:8px 12px;text-align:left;border-radius:6px 0 0 0;">What you need</th>
-          <th style="padding:8px 12px;text-align:left;">Object to select</th>
-          <th style="padding:8px 12px;text-align:left;border-radius:0 6px 0 0;">Tick</th>
-        </tr>
-      </thead>
+    <div class="step-bar">
+      <div class="step"><div class="step-num">1</div><span>Click the ZN boundary polygon on the map</span></div>
+      <div class="step"><div class="step-num">2</div><span>Open Build a Query</span></div>
+      <div class="step"><div class="step-num">3</div><span>Select object below → tick In Selection → Run</span></div>
+    </div>
+    <table class="cheat-table">
+      <thead><tr><th>What you need</th><th>Object to select</th><th>Tick</th></tr></thead>
       <tbody>
-        <tr style="background:#f8fafd;">
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-weight:600;color:#1F3864;">Chamber Surveys</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-family:monospace;background:#e8f0fe;color:#1F3864;">GF Chamber survey</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;">In Selection</td>
-        </tr>
-        <tr style="background:white;">
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-weight:600;color:#1F3864;">Pole Surveys</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-family:monospace;background:#e8f0fe;color:#1F3864;">GF Pole survey</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;">In Selection</td>
-        </tr>
-        <tr style="background:#f8fafd;">
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-weight:600;color:#1F3864;">Line Surveys</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-family:monospace;background:#e8f0fe;color:#1F3864;">GF Line Survey</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;">In Selection</td>
-        </tr>
-        <tr style="background:white;">
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-weight:600;color:#1F3864;">Survey Polygons</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-family:monospace;background:#e8f0fe;color:#1F3864;">Survey Polygon</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;">In Selection</td>
-        </tr>
-        <tr style="background:#f8fafd;">
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-weight:600;color:#1F3864;">DN Areas</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;font-family:monospace;background:#e8f0fe;color:#1F3864;">DN Area</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #e0e0e0;">In Selection</td>
-        </tr>
-        <tr style="background:white;">
-          <td style="padding:8px 12px;font-weight:600;color:#1F3864;">LOC Polygons</td>
-          <td style="padding:8px 12px;font-family:monospace;background:#e8f0fe;color:#1F3864;">LOC</td>
-          <td style="padding:8px 12px;">In Selection</td>
-        </tr>
+        <tr><td>Chamber Surveys</td><td><span class="cheat-code">GF Chamber survey</span></td><td>In Selection</td></tr>
+        <tr><td>Pole Surveys</td><td><span class="cheat-code">GF Pole survey</span></td><td>In Selection</td></tr>
+        <tr><td>Line Surveys</td><td><span class="cheat-code">GF Line Survey</span></td><td>In Selection</td></tr>
+        <tr><td>Survey Polygons</td><td><span class="cheat-code">Survey Polygon</span></td><td>In Selection</td></tr>
+        <tr><td>DN Areas</td><td><span class="cheat-code">DN Area</span></td><td>In Selection</td></tr>
+        <tr><td>LOC Polygons</td><td><span class="cheat-code">LOC</span></td><td>In Selection</td></tr>
       </tbody>
     </table>
-    <div style="margin-top:12px;background:#fffbea;border:1px solid #f6d860;border-radius:8px;padding:8px 14px;">
-      <span style="font-size:12px;color:#7a6000;">💡 <strong>Tip:</strong> Work through each query list top to bottom before moving to the next. Chambers first, then poles, then lines, then polygons. Never go back to map tracing mid-list.</span>
-    </div>
+    <div class="cheat-tip">💡 <strong>Tip:</strong> Finish your full map trace before running any queries. Trace first, validate second.</div>
   </div>
 
-
+  <!-- Load / Save -->
   <div class="card">
-    <h2>Load / Save Session</h2>
+    <div class="card-header">
+      <div class="card-icon">💾</div>
+      <div class="card-title">Load / Save Session</div>
+    </div>
     <div class="load-area">
       <span>📂 Load a previously saved validation to continue editing:</span>
       <input type="file" id="loadFile" accept=".json" onchange="loadSession(event)"/>
-      <button class="btn-main btn-purple" onclick="saveSessionFile()">💾 Save Session File</button>
+      <button class="btn btn-purple btn-sm" onclick="saveSessionFile()">💾 Save Session File</button>
     </div>
   </div>
 
+  <!-- Log a Fail -->
   <div class="card">
-    <h2>Log a Fail</h2>
-    <div class="hint">📋 <strong>Screenshot:</strong> Snip with Win + Shift + S then press <strong>Ctrl+V</strong> anywhere on this page.</div>
-    <div class="quick-label" id="qLabel">Quick Issues:</div>
-    <div class="quick-hint">Select quick issues and/or type a custom one — then click Add.</div>
+    <div class="card-header">
+      <div class="card-icon">⚠️</div>
+      <div class="card-title">Log a Fail</div>
+    </div>
+    <div class="hint">📋 <strong>Desktop:</strong> Snip with Win + Shift + S then Ctrl+V anywhere on this page &nbsp;|&nbsp; 📱 <strong>Mobile:</strong> Use the camera button below</div>
+    <div class="quick-label" id="qLabel">Quick Issues</div>
+    <div class="quick-hint">Select one or more quick issues and/or type a custom one — then click Add.</div>
     <div class="quick-wrap" id="qWrap"></div>
-    <div class="form-grid">
+    <div class="log-grid">
       <div>
         <label>Asset Type</label>
         <select id="assetType" onchange="typeChanged()">
@@ -197,53 +610,67 @@
       <div><label>Additional / Custom Issue</label><input type="text" id="customInput" placeholder="Optional — type extra issue here..."/></div>
       <div>
         <label>Screenshot / Photo</label>
-        <div class="paste-box" id="pasteBox" style="position:relative;">
-          <span style="font-size:16px">📋</span>
+        <div class="paste-box" id="pasteBox">
+          <span style="font-size:18px;">📋</span>
           <span id="pasteLabel">Ctrl+V to paste snip</span>
           <button id="clearPicBtn" style="display:none" onclick="clearPic()">✕ Remove</button>
         </div>
-        <label for="cameraInput" style="margin-top:5px;display:block;background:#2E75B6;color:white;border-radius:6px;padding:5px 10px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;">📷 Take / Upload Photo</label>
+        <label for="cameraInput" class="camera-label">📷 Take / Upload Photo</label>
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="onCameraPhoto(event)"/>
       </div>
     </div>
     <div class="add-row">
-      <button class="btn-main btn-add" onclick="addFail()">+ Add</button>
+      <button class="btn btn-add" onclick="addFail()">+ Add</button>
       <span class="sel-count" id="selCount"></span>
       <button class="btn-desel" id="deselBtn" style="display:none" onclick="deselectAll()">Deselect all</button>
     </div>
   </div>
 
+  <!-- Logged Fails -->
   <div class="card">
-    <h2>Logged Fails <span id="failBadge" class="count-badge" style="display:none">0</span></h2>
-    <div id="failList"><p class="empty">No fails logged yet.</p></div>
+    <div class="card-header">
+      <div class="card-icon">📝</div>
+      <div class="card-title">Logged Fails <span id="failBadge" class="count-badge" style="display:none">0</span></div>
+    </div>
+    <div id="failList">
+      <div class="empty">
+        <div class="empty-icon">✅</div>
+        <p>No fails logged yet — add one above.</p>
+      </div>
+    </div>
   </div>
 
+  <!-- Output -->
   <div class="card">
-    <h2>Output — Ready to Send</h2>
+    <div class="card-header">
+      <div class="card-icon">📤</div>
+      <div class="card-title">Output — Ready to Send</div>
+    </div>
     <div id="outHeader" class="out-header" style="display:none"></div>
     <ul class="out-lines" id="outLines"><li class="out-empty">Logged fails will appear here.</li></ul>
     <div class="out-actions">
-      <button class="btn-main btn-green"  onclick="exportWord()" id="exportBtn">⬇ Export Word Doc</button>
-      <button class="btn-main btn-orange" onclick="openOutlook()">✉ Open in Outlook</button>
-      <button class="btn-main btn-dark"   onclick="copyOut()">Copy Text</button>
-      <button class="btn-main btn-light"  onclick="clearAll()">Clear All</button>
-      <span style="font-size:12px;color:#27ae60;font-weight:600;display:none" id="copiedMsg">✓ Copied!</span>
+      <button class="btn btn-export" onclick="exportWord()" id="exportBtn">⬇ Export Word Doc</button>
+      <button class="btn btn-outlook" onclick="openOutlook()">✉ Open in Outlook</button>
+      <button class="btn btn-copy" onclick="copyOut()">Copy Text</button>
+      <button class="btn btn-danger btn-sm" onclick="clearAll()">Clear All</button>
+      <span style="font-size:12px;color:var(--green-dark);font-weight:700;display:none" id="copiedMsg">✓ Copied!</span>
     </div>
-    <p class="export-note">📄 <strong>Export Word Doc</strong> includes embedded screenshots. &nbsp;✉ <strong>Open in Outlook</strong> pre-fills the surveyor's email with issue text.</p>
+    <p class="export-note">📄 <strong>Export Word Doc</strong> includes embedded screenshots and ZN summary. &nbsp;✉ <strong>Open in Outlook</strong> pre-fills email with intro, fails, and sign-off.</p>
   </div>
+
 </div>
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
-    <h3>Edit Fail</h3>
+    <h3>✏️ Edit Fail</h3>
     <label>Reference / ID</label>
     <input type="text" id="editRef"/>
-    <label>Issues (comma separated)</label>
+    <label>Issues <span style="font-weight:400;text-transform:none;font-size:11px;">— separate multiple with a comma</span></label>
     <textarea id="editIssues"></textarea>
     <div class="modal-actions">
-      <button class="btn-main btn-add" onclick="saveEdit()">Save</button>
-      <button class="btn-main btn-light" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-add btn-sm" onclick="saveEdit()">Save Changes</button>
+      <button class="btn btn-copy btn-sm" onclick="closeModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -252,7 +679,9 @@
   <span class="lb-close">×</span>
   <img id="lbImg" src=""/>
 </div>
+
 <script>
+
 (function(global2, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global2 = typeof globalThis !== "undefined" ? globalThis : global2 || self, factory(global2.docx = {}));
 })(this, (function(exports2) {
@@ -22833,6 +23262,7 @@ var __async = (__this, __arguments, generator) => {
 }));
 </script>
 <script>
+
 var ISSUES = {
   GFCS:   ["No wide angle photo","No internal photo showing duct route","No lid / cover photo","Internal photo does not show room for equipment","Chamber not listed correctly in IQGeo","Duct entries in photo don't match IQGeo record","Asbestos"],
   GFLS:   ["Surveyed as ND — PIA duct present","Line not classified correctly (Spine / Sub-Spine)","Line classification (C/W FW Soft)","Spine not fluid","Subspine not fluid","A55 not submitted for proposed dig"],
@@ -22844,8 +23274,8 @@ var ISSUES = {
   A55:    ["Missing A55","Incorrect measurements","Incorrect photos","Poor quality","Asbestos"]
 };
 var PREFIX = { GFCS:"GFCS", GFLS:"GFLS", GFPS:"GFPS", LOC:"LOC", UPRN:"UPRN", DN:"DN", SURVEY:"Survey Polygon", A55:"A55" };
-var STORAGE_KEY = "gf_fails_v14";
-var FIELDS_KEY  = "gf_fields_v14";
+var STORAGE_KEY = "gf_fails_v15";
+var FIELDS_KEY  = "gf_fields_v15";
 
 var fails = [];
 var selected = [];
@@ -22865,7 +23295,9 @@ function saveSession() {
       buildArea: document.getElementById("buildArea").value,
       name: document.getElementById("surveyorName").value,
       phone: document.getElementById("surveyorPhone").value,
-      email: document.getElementById("surveyorEmail").value
+      email: document.getElementById("surveyorEmail").value,
+      notes: document.getElementById("znNotes").value,
+      date: document.getElementById("valDate").value
     };
     localStorage.setItem(FIELDS_KEY, JSON.stringify(fields));
     var bar = document.getElementById("saveBar");
@@ -22890,6 +23322,8 @@ function restoreSession() {
       document.getElementById("surveyorName").value = f.name || "";
       document.getElementById("surveyorPhone").value = f.phone || "";
       document.getElementById("surveyorEmail").value = f.email || "";
+      if (f.notes) document.getElementById("znNotes").value = f.notes || "";
+      if (f.date) document.getElementById("valDate").value = f.date || "";
     }
   } catch(e) {}
 }
@@ -22936,6 +23370,8 @@ function loadSession(event) {
         document.getElementById("surveyorName").value = data.fields.name || "";
         document.getElementById("surveyorPhone").value = data.fields.phone || "";
         document.getElementById("surveyorEmail").value = data.fields.email || "";
+        document.getElementById("znNotes").value = data.fields.notes || "";
+        document.getElementById("valDate").value = data.fields.date || "";
       }
       refresh();
       saveSession();
@@ -23126,6 +23562,18 @@ function refreshList() {
     }
     html += '</div>';
   }
+  // Fail counter by type
+  var typeCounts = {};
+  for (var tc = 0; tc < fails.length; tc++) {
+    var tkey = fails[tc].label.split(" ")[0];
+    typeCounts[tkey] = (typeCounts[tkey] || 0) + 1;
+  }
+  var counterParts = [];
+  for (var tk in typeCounts) { counterParts.push('<span class="type-pill">' + typeCounts[tk] + ' ' + tk + '</span>'); }
+  if (counterParts.length) {
+    html += '<div class="type-counter">' + counterParts.join("") + '</div>';
+  }
+
   list.innerHTML = html;
 }
 
@@ -23136,8 +23584,10 @@ function getHeaderParts() {
   var name      = document.getElementById("surveyorName").value.trim();
   var phone     = document.getElementById("surveyorPhone").value.trim();
   var email     = document.getElementById("surveyorEmail").value.trim();
+  var valDate   = document.getElementById("valDate").value.trim();
   if (zn)        parts.push("ZN: " + zn);
   if (buildArea) parts.push("Build Area: " + buildArea);
+  if (valDate)   parts.push("Date: " + valDate);
   if (name)      parts.push("Surveyor: " + name);
   if (phone)     parts.push(phone);
   if (email)     parts.push(email);
@@ -23266,12 +23716,20 @@ function resolveImage(fail) {
 function doExport() {
   var D = docx;
   var parts = getHeaderParts();
-  var zn = document.getElementById("znId").value.trim();
+  var zn        = document.getElementById("znId").value.trim();
+  var buildArea = document.getElementById("buildArea").value.trim();
+  var valDate   = document.getElementById("valDate").value.trim();
+  var znNotes   = document.getElementById("znNotes").value.trim();
   var children = [];
 
+  // Title
   children.push(new D.Paragraph({
-    children: [new D.TextRun({ text: "Go Fibre \u2014 Validation Report", bold: true, size: 32, font: "Arial", color: "1F3864" })],
-    spacing: { after: 160 }
+    children: [
+      new D.TextRun({ text: "Go Fibre", bold: true, size: 40, font: "Arial", color: "1E2530" }),
+      new D.TextRun({ text: "  |  Validation Report", bold: false, size: 28, font: "Arial", color: "3D9E7A" })
+    ],
+    spacing: { after: 80 },
+    border: { bottom: { style: D.BorderStyle.SINGLE, size: 6, color: "7DFFD1", space: 1 } }
   }));
 
   var buildArea = document.getElementById("buildArea").value.trim();
@@ -23281,11 +23739,38 @@ function doExport() {
       spacing: { before: 0, after: 80 }
     }));
   }
+  // ZN summary intro line
+  var summaryParts = [];
+  if (zn) summaryParts.push(zn);
+  if (buildArea) summaryParts.push(buildArea);
+  var summaryZN = summaryParts.join(" \u2014 ");
+  var summaryDate = valDate || new Date().toLocaleDateString("en-GB");
+  children.push(new D.Paragraph({
+    children: [new D.TextRun({ text: "The following fails were identified during validation of " + (summaryZN || "this ZN") + " on " + summaryDate + ". Please review, update accordingly, and return the revised sheet.", size: 20, font: "Arial", color: "444444", italics: true })],
+    spacing: { before: 120, after: 120 }
+  }));
+
   if (parts.length) {
+    var hdrText = parts.filter(function(p) { return p.indexOf("@") === -1; }).join("   |   ");
     children.push(new D.Paragraph({
-      children: [new D.TextRun({ text: parts.join("   |   "), bold: true, size: 20, font: "Arial", color: "FFFFFF" })],
-      shading: { fill: "1F3864", type: D.ShadingType.CLEAR },
+      children: [new D.TextRun({ text: hdrText, bold: true, size: 20, font: "Arial", color: "FFFFFF" })],
+      shading: { fill: "1E2530", type: D.ShadingType.CLEAR },
       spacing: { before: 60, after: 300 }
+    }));
+  }
+
+  // Fail counter by type
+  var typeCounts = {};
+  for (var tc = 0; tc < fails.length; tc++) {
+    var tkey = fails[tc].label.split(" ")[0];
+    typeCounts[tkey] = (typeCounts[tkey] || 0) + 1;
+  }
+  var counterParts = [];
+  for (var tk in typeCounts) { counterParts.push(typeCounts[tk] + " x " + tk); }
+  if (counterParts.length) {
+    children.push(new D.Paragraph({
+      children: [new D.TextRun({ text: "Summary: " + counterParts.join("  |  "), bold: true, size: 18, font: "Arial", color: "3D9E7A" })],
+      spacing: { before: 0, after: 200 }
     }));
   }
 
@@ -23310,6 +23795,19 @@ function doExport() {
         spacing: { after: 240 }
       }));
     }
+  }
+
+  // ZN Notes
+  if (znNotes) {
+    children.push(new D.Paragraph({
+      children: [new D.TextRun({ text: "General Notes", bold: true, size: 22, font: "Arial", color: "1E2530" })],
+      spacing: { before: 300, after: 80 },
+      border: { bottom: { style: D.BorderStyle.SINGLE, size: 4, color: "7DFFD1", space: 1 } }
+    }));
+    children.push(new D.Paragraph({
+      children: [new D.TextRun({ text: znNotes, size: 20, font: "Arial", color: "333333" })],
+      spacing: { before: 80, after: 200 }
+    }));
   }
 
   var doc = new D.Document({
@@ -23370,7 +23868,7 @@ document.addEventListener("paste", function(e) {
   }
 });
 
-var fids = ["znId","buildArea","surveyorName","surveyorPhone","surveyorEmail"];
+var fids = ["znId","buildArea","surveyorName","surveyorPhone","surveyorEmail","znNotes","valDate"];
 for (var fi = 0; fi < fids.length; fi++) {
   document.getElementById(fids[fi]).addEventListener("input", function() {
     refreshOutput();
